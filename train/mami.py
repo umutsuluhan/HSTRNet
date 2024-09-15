@@ -8,6 +8,7 @@ import numpy as np
 import random
 import time
 import math
+import os
 
 from tqdm import tqdm
 from model.HSTRNet import HSTRNet
@@ -15,23 +16,25 @@ from utils.dataset import MAMIDataset
 from utils.dataset import DataLoader
 from utils.utils import ssim_matlab
 
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def train(model):
 
-    dataset_train = MAMIDataset("train", "/home/ortak/mughees/datasets/MAMI/train/", device)
+def train(args, model):
+
+    dataset_train = MAMIDataset("train", os.path.join(args.dataset, "train"), device)
     train_data = DataLoader(
-        dataset_train, batch_size=16, num_workers=0, drop_last=True, shuffle=True
+        dataset_train, batch_size=args.train_bs, num_workers=args.workers, drop_last=True, shuffle=True
     )
     
-    dataset_val = MAMIDataset("validation", "/home/ortak/mughees/datasets/MAMI/test/", device)
-    val_data = DataLoader(dataset_val, batch_size=16, num_workers=0, shuffle=False)
+    dataset_val = MAMIDataset("validation", os.path.join(args.dataset, "test"), device)
+    val_data = DataLoader(dataset_val, batch_size=args.val_bs, num_workers=args.workers, shuffle=False)
 
     len_val = dataset_val.__len__()
     
     L1_lossFn = nn.L1Loss()
     params = model.parameters()
-    optimizer = optim.Adam(params, lr=0.0001)
+    optimizer = optim.Adam(params, lr=args.lr)
     
     print("Training...")
     
@@ -46,7 +49,7 @@ def train(model):
     psnr_list = []
     ssim_list = []
 
-    for epoch in range(1, 100):
+    for epoch in range(1, args.epoch):
         model.ifnet.train()
         model.contextnet.train()
         model.attention.train()
@@ -77,11 +80,11 @@ def train(model):
             end = time.time()
             
             if trainIndex == (train_data.__len__() - 1):
-                torch.save(model.ifnet.state_dict(), "model_dict/mami/HSTR_ifnet_" + str(epoch) + ".pkl")
-                torch.save(model.contextnet.state_dict(), "model_dict/mami/HSTR_contextnet_" + str(epoch) + ".pkl")
-                torch.save(model.attention.state_dict(), "model_dict/mami/HSTR_attention_" + str(epoch) + ".pkl")
-                torch.save(model.unet.state_dict(), "model_dict/mami/HSTR_unet_" + str(epoch) + ".pkl")
-                torch.save(optimizer.state_dict(), "model_dict/mami/HSTR_optimizer_" + str(epoch) + ".pkl")
+                torch.save(model.ifnet.state_dict(), f"{args.save_folder}/HSTR_ifnet_" + str(epoch) + ".pkl")
+                torch.save(model.contextnet.state_dict(), f"{args.save_folder}/HSTR_contextnet_" + str(epoch) + ".pkl")
+                torch.save(model.attention.state_dict(), f"{args.save_folder}/HSTR_attention_" + str(epoch) + ".pkl")
+                torch.save(model.unet.state_dict(), f"{args.save_folder}/HSTR_unet_" + str(epoch) + ".pkl")
+                torch.save(optimizer.state_dict(), f"{args.save_folder}/HSTR_optimizer_" + str(epoch) + ".pkl")
 
                 with torch.no_grad():
                     psnr, ssim = validate(model, val_data, len_val, 1)
@@ -132,9 +135,16 @@ def validate(model, val_data, len_val, batch_size):
                 ssim_list.append(ssim_)
     return np.mean(psnr_list) * batch_size, np.mean(ssim_list) * batch_size
     
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="train")
+    parser.add_argument("--dataset", default='', type=str)
+    parser.add_argument("--save_folder", default='model_dict/mami', type=str)
     parser.add_argument("--epoch", default=101, type=int)
+    parser.add_argument("--lr", default=0.0001, type=float)
+    parser.add_argument("--train_bs", default=16, type=int)
+    parser.add_argument("--val_bs", default=4, type=int)
+    parser.add_argument("--workers", default=4, type=int)
     args = parser.parse_args()
 
     seed = 1
@@ -143,10 +153,11 @@ if __name__ == "__main__":
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.benchmark = True
+    torch.multiprocessing.set_start_method('spawn')
 
     model = HSTRNet(device)
 
     try:
-        train(model)
+        train(args, model)
     except Exception as e:
         print("Unexpected exception! %s", e)
