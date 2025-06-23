@@ -3,7 +3,7 @@
 **Authors:** [H. Umut Suluhan](), [Abdullah Enes Doruk](), [Hasan F. Ates](), and [Bahadir K. Gunturk]()
 
 
-[![arXiv](https://img.shields.io/badge/arXiv-Paper-<COLOR>.svg)](https://arxiv.org/pdf/2310.12092)
+[![arXiv](https://img.shields.io/badge/Springer-Paper-<COLOR>.svg)](https://link.springer.com/article/10.1007/s00138-025-01685-w)
 [![GitHub Stars](https://img.shields.io/github/stars/umutsuluhan/HSTRNet?style=social)](https://github.com/umutsuluhan/HSTRNet)
 ![visitors](https://visitor-badge.laobi.icu/badge?page_id=umutsuluhan/HSTRNet)
 
@@ -111,10 +111,14 @@ python train/mami.py --dataset data/MAMI --epoch 100 --lr 0.0001 --train_bs 16 -
 
 ## Citation
 ```
-@article{suluhan2023hstr,
-    title={HSTR-Net: Reference Based Video Super-resolution for Aerial Surveillance with Dual Cameras},
-    author={Suluhan, H Umut and Ates, Hasan F and Gunturk, Bahadir K},
-    journal={arXiv preprint arXiv:2310.12092},
-    year={2023}
+@article{suluhan2025hstr,
+  title={Hstr-net: reference based video super-resolution with dual cameras},
+  author={Suluhan, H Umut and Doruk, Abdullah Enes and Ates, Hasan F and Gunturk, Bahadir K},
+  journal={Machine Vision and Applications},
+  volume={36},
+  number={3},
+  pages={69},
+  year={2025},
+  publisher={Springer}
 }
 ```
