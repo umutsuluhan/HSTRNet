@@ -46,7 +46,7 @@ conda activate hstrnet
 ```
 
 ## Datasets 
-Downloads [Vimeo](), [Vizdrone](), and [MAMI]() datasets.
+Downloads [Vimeo](http://toflow.csail.mit.edu/), [Visdrone](https://github.com/VisDrone/VisDrone-Dataset), and [MAMI](https://www.sdms.afrl.af.mil/index.php?collection=mami2013) datasets.
 
 ```
 HSTRNet
